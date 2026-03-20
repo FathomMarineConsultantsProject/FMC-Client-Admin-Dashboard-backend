@@ -5,26 +5,26 @@ require("dotenv").config();
 
 const app = express();
 
+// ✅ CORS FIX (NO app.options)
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://fmc-ca-inspection-dashboardd.vercel.app"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true
+}));
+
 app.use(express.json());
-app.use(cors());
 
 // Routes
-const authRoutes = require("./routes/authRoutes");
-const requestRoutes = require("./routes/requestRoutes");
-const quoteRoutes = require("./routes/quoteRoutes");
-const surveyorRoutes = require("./routes/surveyorRoutes");
-const inspectionRoutes = require("./routes/inspectionRoutes");
-const enquiryRoutes = require("./routes/enquiryRoutes"); 
+const enquiryRoutes = require("./routes/enquiryRoutes");
+app.use("/api/enquiries", enquiryRoutes);
 
-app.use("/api/auth", authRoutes);
-app.use("/api/requests", requestRoutes);
-app.use("/api/quotes", quoteRoutes);
-app.use("/api/surveyors", surveyorRoutes);
-app.use("/api/inspections", inspectionRoutes);
-app.use("/api/enquiries", enquiryRoutes); 
-
+// DB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
 
-app.listen(5000, () => console.log("Server running on port 5000"));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
