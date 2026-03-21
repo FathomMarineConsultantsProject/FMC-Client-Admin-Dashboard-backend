@@ -35,8 +35,9 @@ exports.createEnquiry = async (req, res) => {
       token
     });
 
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    const link = `${frontendUrl}/surveyor-enquiry/${token}`;
+    // surveyorController.js mein ye line check karein
+const frontendUrl = process.env.FRONTEND_URL || "https://fmc-ca-inspection-dashboardd.vercel.app";
+const link = `${frontendUrl}/surveyor-enquiry/${token}`;
 
     // Professional HTML Email Layout (Company: Fathom Marine Consultants)
 await transporter.sendMail({
