@@ -1,50 +1,85 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
 require("dotenv").config();
-
-const enquiryRoutes = require("./routes/enquiryRoutes");
 
 const app = express();
 
+/* =========================
+   ROUTES
+========================= */
+const authRoutes = require("./routes/authRoutes");
+const requestRoutes = require("./routes/requestRoutes");
+const quoteRoutes = require("./routes/quoteRoutes");
+const inspectionRoutes = require("./routes/inspectionRoutes");
+const surveyorRoutes = require("./routes/surveyorRoutes");
+const enquiryRoutes = require("./routes/enquiryRoutes");
+
+/* =========================
+   MIDDLEWARE
+========================= */
+app.use(helmet());
+app.use(morgan("dev"));
+
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://fmc-ca-inspection-dashboardd.vercel.app"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  origin: process.env.ALLOWED_ORIGINS?.split(","),
   credentials: true
 }));
 
 app.use(express.json());
 
+/* =========================
+   ROOT
+========================= */
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "CA Backend is running" });
+  res.json({ message: "🚀 CA Backend running" });
 });
 
-let isConnected = false;
-
-async function connectDB() {
-  if (isConnected) return;
-
-  await mongoose.connect(process.env.MONGO_URI, {
-    bufferCommands: false
-  });
-
-  isConnected = true;
-  console.log("MongoDB connected");
-}
-
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-    next();
-  } catch (err) {
-    console.error("MongoDB connection failed:", err);
-    return res.status(500).json({ message: "Database connection failed" });
-  }
-});
-
+/* =========================
+   ROUTES
+========================= */
+app.use("/api/auth", authRoutes);
+app.use("/api/requests", requestRoutes);
+app.use("/api/quotes", quoteRoutes);
+app.use("/api/inspections", inspectionRoutes);
+app.use("/api/surveyors", surveyorRoutes);
 app.use("/api/enquiries", enquiryRoutes);
+
+/* =========================
+   404 HANDLER
+========================= */
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
+
+/* =========================
+   ERROR HANDLER
+========================= */
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({
+    message: "Server error",
+    error: err.message
+  });
+});
+
+/* =========================
+   LOCAL SERVER
+========================= */
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+
+  mongoose.connect(process.env.MONGO_URI)
+    .then(() => {
+      console.log("✅ MongoDB connected");
+
+      app.listen(PORT, () => {
+        console.log(`🚀 Server running on ${PORT}`);
+      });
+    })
+    .catch(err => console.error("DB Error:", err));
+}
 
 module.exports = app;
