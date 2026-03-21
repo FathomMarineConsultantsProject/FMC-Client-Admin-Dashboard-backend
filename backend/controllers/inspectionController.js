@@ -1,6 +1,6 @@
 const Inspection = require("../models/Inspection");
 const Request = require("../models/InspectionRequest");
-const Surveyor = require('../models/Surveyor'); 
+const Surveyor = require('../models/Surveyor');
 const transporter = require("../config/mailer");
 
 /* =========================
