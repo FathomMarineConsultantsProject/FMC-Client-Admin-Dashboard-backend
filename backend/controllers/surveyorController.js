@@ -39,36 +39,37 @@ exports.createEnquiry = async (req, res) => {
     const link = `${frontendUrl}/surveyor-enquiry/${token}`;
 
     // Professional HTML Email Layout (Company: Fathom Marine Consultants)
-    await transporter.sendMail({
-      from: '"Fathom Marine Consultants" <donotreply@fathommarine.com>',
-      to: surveyorEmail,
-      subject: "You are invited to confirm your availability for a new assignment",
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #1a1a1a; max-width: 650px; margin: auto; padding: 20px; line-height: 1.5;">
-          <p style="margin-bottom: 25px;">Dear ${surveyorName},</p>
-          
-          <p style="font-weight: bold; margin-bottom: 25px;">PLEASE DO NOT RESPOND TO THIS EMAIL</p>
-          
-          <p style="margin-bottom: 25px;">
-            You are invited to confirm your availabilty for the following assignment: 
-            <a href="${link}" style="color: #0056b3; text-decoration: underline;">Please click here to indicate your availability to attend</a>
-          </p>
+await transporter.sendMail({
+  // FIX: 'from' field mein vahi email use karein jo .env mein hai
+  from: `"Fathom Marine Consultants" <${process.env.EMAIL_USER}>`, 
+  to: surveyorEmail,
+  subject: "You are invited to confirm your availability for a new assignment",
+  html: `
+    <div style="font-family: Arial, sans-serif; color: #1a1a1a; max-width: 650px; margin: auto; padding: 20px; line-height: 1.5;">
+      <p style="margin-bottom: 25px;">Dear ${surveyorName},</p>
+      
+      <p style="font-weight: bold; margin-bottom: 25px;">PLEASE DO NOT RESPOND TO THIS EMAIL</p>
+      
+      <p style="margin-bottom: 25px;">
+        You are invited to confirm your availabilty for the following assignment: 
+        <a href="${link}" style="color: #0056b3; text-decoration: underline;">Please click here to indicate your availability to attend</a>
+      </p>
 
-          <p style="font-style: italic; font-size: 13px; color: #333; margin-top: 30px; margin-bottom: 25px;">
-            Inspection prices are in the agreed currency (USD, GBP or EUR). This is a lump sum inclusive of time for travel, 
-            survey and reporting plus related expenses such as travel, airfares and other subsistence. 
-            Prices exclude any local agent fees or launch boat costs if applicable.
-          </p>
+      <p style="font-style: italic; font-size: 13px; color: #333; margin-top: 30px; margin-bottom: 25px;">
+        Inspection prices are in the agreed currency (USD, GBP or EUR). This is a lump sum inclusive of time for travel, 
+        survey and reporting plus related expenses such as travel, airfares and other subsistence. 
+        Prices exclude any local agent fees or launch boat costs if applicable.
+      </p>
 
-          <p style="margin-bottom: 25px;">
-            This enquiry is time sensitive, therefore your swift response is appreciated. 
-            If you are unavailable to attend you can decline on the above line.
-          </p>
+      <p style="margin-bottom: 25px;">
+        This enquiry is time sensitive, therefore your swift response is appreciated. 
+        If you are unavailable to attend you can decline on the above line.
+      </p>
 
-          <p>In case you require any assistance please contact operations.</p>
-        </div>
-      `
-    });
+      <p>In case you require any assistance please contact operations.</p>
+    </div>
+  `
+});
 
     res.json({ success: true, message: "Enquiry sent and broadcasted", enquiry });
 
