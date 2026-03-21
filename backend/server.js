@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+const enquiryRoutes = require("./routes/enquiryRoutes");
+
 const app = express();
 
 app.use(cors({
@@ -16,25 +18,40 @@ app.use(cors({
 
 app.use(express.json());
 
-const enquiryRoutes = require("./routes/enquiryRoutes");
-app.use("/api/enquiries", enquiryRoutes);
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "CA Backend is running" });
+});
 
-const PORT = process.env.PORT || 5000;
+let isConnected = false;
 
-async function startServer() {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("MongoDB connected");
+async function connectDB() {
+  if (isConnected) return;
 
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (err) {
-    console.error("MongoDB connection failed:");
-    console.error(err);
-  }
+  await mongoose.connect(process.env.MONGO_URI, {
+    bufferCommands: false
+  });
+
+  isConnected = true;
+  console.log("MongoDB connected");
 }
 
-startServer();
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("MongoDB connection failed:", err);
+    return res.status(500).json({ message: "Database connection failed" });
+  }
+});
+
+app.use("/api/enquiries", enquiryRoutes);
 
 module.exports = app;
+
+if (process.env.VERCEL !== "1") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
