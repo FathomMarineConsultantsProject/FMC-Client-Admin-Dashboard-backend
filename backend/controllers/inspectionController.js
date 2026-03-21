@@ -1,7 +1,21 @@
 const Inspection = require("../models/Inspection");
 const Request = require("../models/InspectionRequest");
-const Surveyor = require("../surveyor.js"); // ⚠️ match your filename
+const Surveyor = require('../models/Surveyor'); 
 const transporter = require("../config/mailer");
+
+/* =========================
+   CREATE INSPECTION (Add)
+========================= */
+exports.createInspection = async (req, res) => {
+  try {
+    const newInspection = new Inspection(req.body);
+    await newInspection.save();
+    res.status(201).json({ msg: "Inspection created", inspection: newInspection });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
 
 /* =========================
    ASSIGN SURVEYOR
@@ -67,14 +81,29 @@ exports.sendPreparation = async (req, res) => {
       subject: "Inspection Assignment",
       html: `
         <h3>Inspection Assigned</h3>
-        <p><b>Vessel:</b> ${inspection.vesselName || "N/A"}</p>
-        <p><b>IMO:</b> ${inspection.imoNumber || "N/A"}</p>
-        <p><b>Port:</b> ${inspection.port || "N/A"}</p>
+        <p><b>Vessel:</b> ${inspection.requestId?.vesselName || "N/A"}</p>
+        <p><b>IMO:</b> ${inspection.requestId?.imoNumber || "N/A"}</p>
+        <p><b>Port:</b> ${inspection.requestId?.port || "N/A"}</p>
       `
     });
 
     res.json({ msg: "Email sent to surveyor" });
 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+/* =========================
+   GET ALL INSPECTIONS
+========================= */
+exports.getAllInspections = async (req, res) => {
+  try {
+    const inspections = await Inspection.find()
+      .populate("surveyorId")
+      .populate("requestId");
+    res.json(inspections);
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Server error" });

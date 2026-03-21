@@ -24,7 +24,9 @@ app.use(helmet());
 app.use(morgan("dev"));
 
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(","),
+  origin: process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",")
+    : "*", // ✅ fallback fix
   credentials: true
 }));
 
@@ -58,7 +60,7 @@ app.use((req, res) => {
    ERROR HANDLER
 ========================= */
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error("🔥 ERROR:", err);
   res.status(500).json({
     message: "Server error",
     error: err.message
@@ -66,20 +68,25 @@ app.use((err, req, res, next) => {
 });
 
 /* =========================
-   LOCAL SERVER
+   DB CONNECTION (IMPORTANT FIX)
+========================= */
+
+// ✅ Always connect DB (Vercel needs this)
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("✅ MongoDB connected");
+  })
+  .catch(err => console.error("❌ DB Error:", err));
+
+/* =========================
+   LOCAL SERVER ONLY
 ========================= */
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;
 
-  mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
-      console.log("✅ MongoDB connected");
-
-      app.listen(PORT, () => {
-        console.log(`🚀 Server running on ${PORT}`);
-      });
-    })
-    .catch(err => console.error("DB Error:", err));
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on ${PORT}`);
+  });
 }
 
 module.exports = app;
