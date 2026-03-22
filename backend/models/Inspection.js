@@ -1,51 +1,74 @@
 const mongoose = require('mongoose');
 
 const InspectionSchema = new mongoose.Schema({
-  // Link to the original request
- // models/Inspection.js mein update:
-requestId: { type: String, unique: true, sparse: true }, // sparse true karne se null values allow ho jayengi
+  // 🆔 Unique Request ID (String format: REQ-123456)
+  requestId: { 
+    type: String, 
+    unique: true, 
+    sparse: true 
+  },
   
-  // Client Info (Made optional if you don't always have it at creation)
+  // 👤 Client Info
   clientId: { type: String }, 
   clientEmail: { type: String },
 
-  // Fields from your Postman request
-  surveyorId: { type: String }, 
-  inspectionDate: { type: String }, // Or Date type if you prefer
-  notes: { type: String },
+  // 🛠️ Surveyor Assignment 
+  // (Isse hum Admin Dashboard mein Surveyor ka actual data 'populate' kar payenge)
+  surveyorId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Surveyor' 
+  }, 
 
-  // General Metadata
-  inspectionType: String,
-  shipType: String,
-  port: String,
-  country: String,
-  dateFrom: String,
-  dateTo: String,
+  // 📅 Inspection Details
+  inspectionDate: { type: String }, 
+  notes: { type: String },
+  inspectionType: { type: String },
+  shipType: { type: String },
+  port: { type: String },
+  country: { type: String },
+  dateFrom: { type: String },
+  dateTo: { type: String },
   
+  // 🚦 Workflow Status
   status: { 
     type: String, 
-    enum: ['Pending Review', 'Quote Sent', 'Quote Approved', 'Scheduled', 'Surveyor Assigned', 'Inspection Completed'],
+    enum: [
+      'Pending Review', 
+      'Quote Sent', 
+      'Quote Approved', 
+      'Scheduled', 
+      'Surveyor Assigned', 
+      'Inspection Completed',
+      'Rejected'
+    ],
     default: 'Pending Review' 
   },
 
-  // Vessel Data
+  // 🚢 Vessel Data
   vesselDetails: {
-    name: String,
-    imo: String,
-    flag: String,
-    classSociety: String
+    name: { type: String },
+    imo: { type: String },
+    flag: { type: String },
+    classSociety: { type: String }
   },
 
-  // Preparation Data
+  // 📋 Full Preparation Data (For Surveyor App)
   preparationInfo: {
     lastInspectionDate: String,
     certificateValidity: String,
     complianceIssues: String,
     captainName: String,
-    captainContact: { phone: String, email: String },
+    captainContact: { 
+      phone: String, 
+      email: String 
+    },
     shipEmail: String,
     specialFocus: [String],
-    crewMembers: [{ name: String, position: String, nationality: String }],
+    crewMembers: [{ 
+      name: String, 
+      position: String, 
+      nationality: String 
+    }],
     ownerDetails: {
       company: String,
       contact: String,
@@ -54,8 +77,18 @@ requestId: { type: String, unique: true, sparse: true }, // sparse true karne se
     }
   },
 
-  fees: Number,
-  createdAt: { type: Date, default: Date.now }
+  // 💰 Financials
+  fees: { 
+    type: Number, 
+    default: 0 
+  },
+
+  // 🕒 Timestamps
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  }
 });
 
+// Middleware: Save se pehle date format ya auto-id logic yahan add kar sakte hain
 module.exports = mongoose.model('Inspection', InspectionSchema);

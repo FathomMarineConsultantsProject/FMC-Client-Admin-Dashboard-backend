@@ -1,23 +1,68 @@
 const Request = require("../models/InspectionRequest");
 
-// Client creates request
+/* =========================
+   1. CLIENT: Create New Request
+========================= */
 exports.createRequest = async (req, res) => {
-  const request = await Request.create({
-    ...req.body,
-    clientId: req.user.id
-  });
+  try {
+    // Generate a human-readable ID if not sent from frontend
+    const requestId = "REQ-" + Math.floor(100000 + Math.random() * 900000);
 
-  res.json(request);
+    const request = await Request.create({
+      ...req.body,
+      requestId, // Unique ID for tracking
+      clientId: req.user.id, // Auth middleware se user ID uthayega
+      status: "Pending Review" // Default status
+    });
+
+    res.status(201).json({
+      success: true,
+      data: request
+    });
+  } catch (err) {
+    console.error("Create Request Error:", err);
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to create request", 
+      error: err.message 
+    });
+  }
 };
 
-// Client sees own requests
+/* =========================
+   2. CLIENT: See Own Requests
+========================= */
 exports.getMyRequests = async (req, res) => {
-  const data = await Request.find({ clientId: req.user.id });
-  res.json(data);
+  try {
+    // Sirf login kiye hue client ki requests dikhayega
+    const data = await Request.find({ clientId: req.user.id })
+      .sort({ createdAt: -1 }); // Nayi requests sabse upar
+    
+    res.json({
+      success: true,
+      count: data.length,
+      data
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
 };
 
-// Admin sees all
+/* =========================
+   3. ADMIN: See All Requests
+========================= */
 exports.getAllRequests = async (req, res) => {
-  const data = await Request.find().populate("clientId", "email");
-  res.json(data);
+  try {
+    // Admin table ke liye saara data with client email
+    const data = await Request.find()
+      .populate("clientId", "email name") 
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Failed to fetch all requests" });
+  }
 };
