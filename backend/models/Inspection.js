@@ -1,27 +1,41 @@
 const mongoose = require('mongoose');
 
 const InspectionSchema = new mongoose.Schema({
-  requestId: { type: String, unique: true },
-  clientId: { type: String, required: true },
-  clientEmail: { type: String, required: true },
+  // Link to the original request
+  requestId: { type: String, unique: true, required: true },
+  
+  // Client Info (Made optional if you don't always have it at creation)
+  clientId: { type: String }, 
+  clientEmail: { type: String },
+
+  // Fields from your Postman request
+  surveyorId: { type: String }, 
+  inspectionDate: { type: String }, // Or Date type if you prefer
+  notes: { type: String },
+
+  // General Metadata
   inspectionType: String,
   shipType: String,
   port: String,
   country: String,
   dateFrom: String,
   dateTo: String,
+  
   status: { 
     type: String, 
-    enum: ['Pending Review', 'Quote Sent', 'Quote Approved', 'Surveyor Assigned', 'Inspection Completed'],
+    enum: ['Pending Review', 'Quote Sent', 'Quote Approved', 'Scheduled', 'Surveyor Assigned', 'Inspection Completed'],
     default: 'Pending Review' 
   },
-  // Data for the "Preparation" form
+
+  // Vessel Data
   vesselDetails: {
     name: String,
     imo: String,
     flag: String,
     classSociety: String
   },
+
+  // Preparation Data
   preparationInfo: {
     lastInspectionDate: String,
     certificateValidity: String,
@@ -38,8 +52,8 @@ const InspectionSchema = new mongoose.Schema({
       chartererContact: String
     }
   },
+
   fees: Number,
-  surveyorId: String, // ID or Email from your other backend
   createdAt: { type: Date, default: Date.now }
 });
 

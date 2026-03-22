@@ -9,11 +9,40 @@ const transporter = require("../config/mailer");
 exports.createInspection = async (req, res) => {
   try {
     const newInspection = new Inspection(req.body);
+    
+    // Save to Database
     await newInspection.save();
-    res.status(201).json({ msg: "Inspection created", inspection: newInspection });
+    
+    res.status(201).json({ 
+      success: true,
+      msg: "Inspection created successfully", 
+      inspection: newInspection 
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Server error" });
+    console.error("Creation Error:", error);
+
+    // If it's a validation error (missing required fields), show the specific message
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        success: false, 
+        msg: "Validation Failed", 
+        error: error.message 
+      });
+    }
+
+    // Handle Duplicate Key (e.g., same requestId sent twice)
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        msg: "An inspection with this requestId already exists." 
+      });
+    }
+
+    res.status(500).json({ 
+      success: false, 
+      msg: "Internal Server Error", 
+      details: error.message 
+    });
   }
 };
 

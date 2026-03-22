@@ -2,16 +2,16 @@ const express = require("express");
 const router = express.Router();
 const inspectionController = require("../controllers/inspectionController");
 
-// 1. Assign surveyor (Ye function controller mein hai)
+// 1. Assign surveyor
 router.post("/assign", inspectionController.assignSurveyor);
 
-// 2. Send preparation email (Ye function bhi controller mein hai)
+// 2. Send preparation email
 router.post("/send-prep", inspectionController.sendPreparation);
 
-// NOTE: Abhi ke liye niche wale dono ko comment kar dijiye jab tak 
-// aap controller mein inka logic nahi likh lete.
+// ✅ ISSE UNCOMMENT KAREIN (Pehle // laga tha, ab hata dein)
+router.post("/add", inspectionController.createInspection); 
 
-// router.post("/add", inspectionController.createInspection); 
-// router.get("/", inspectionController.getAllInspections);
+// ✅ ISSE BHI UNCOMMENT KAREIN (Agar saari inspections dekhni hain)
+router.get("/", inspectionController.getAllInspections);
 
 module.exports = router;
