@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const InspectionSchema = new mongoose.Schema({
   // Link to the original request
-  requestId: { type: String, unique: true, required: true },
+ // models/Inspection.js mein update:
+requestId: { type: String, unique: true, sparse: true }, // sparse true karne se null values allow ho jayengi
   
   // Client Info (Made optional if you don't always have it at creation)
   clientId: { type: String }, 
