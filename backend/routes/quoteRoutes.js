@@ -1,11 +1,7 @@
-const express = require("express");
-const router = express.Router();
+const router = require("express").Router();
 const quoteController = require("../controllers/quoteController");
 
-// Create quote
-router.post("/", quoteController.createQuote);
-
-// Approve / Reject
-router.patch("/:id", quoteController.updateQuoteStatus);
+// POST -> /api/quotes/send
+router.post("/send", quoteController.createQuote);
 
 module.exports = router;

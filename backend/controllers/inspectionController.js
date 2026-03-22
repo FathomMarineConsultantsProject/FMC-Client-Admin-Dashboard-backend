@@ -24,36 +24,37 @@ exports.assignSurveyor = async (req, res) => {
   try {
     const { requestId, surveyorId } = req.body;
 
+    // Check karein ki IDs valid ObjectId format mein hain ya nahi
     if (!requestId || !surveyorId) {
-      return res.status(400).json({ msg: "Missing data" });
+      return res.status(400).json({ msg: "Please provide both requestId and surveyorId" });
     }
 
-    const request = await Request.findById(requestId);
+    // Yahan findById hi use karein
+    const request = await Request.findById(requestId); 
     if (!request) {
-      return res.status(404).json({ msg: "Request not found" });
+      return res.status(404).json({ msg: "Request not found in Database" });
     }
 
     const surveyor = await Surveyor.findById(surveyorId);
     if (!surveyor) {
-      return res.status(404).json({ msg: "Surveyor not found" });
+      return res.status(404).json({ msg: "Surveyor not found in Database" });
     }
 
+    // Status update
     request.status = "Surveyor Assigned";
     await request.save();
 
+    // Inspection record create karein
     const inspection = await Inspection.create({
-      requestId,
-      surveyorId
+      requestId: request._id,
+      surveyorId: surveyor._id
     });
 
-    res.json({
-      msg: "Surveyor assigned successfully",
-      inspection
-    });
+    res.json({ msg: "Surveyor assigned successfully", inspection });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Server error" });
+    console.error("Assign Error:", error);
+    res.status(500).json({ msg: "Server error", error: error.message });
   }
 };
 

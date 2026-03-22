@@ -15,12 +15,12 @@ const enquirySchema = new mongoose.Schema({
   surveyorFee: Number,
 
   token: String,
-
-  status: {
-    type: String,
-    enum: ["pending", "confirmed", "declined"],
-    default: "pending"
-  },
+status: {
+  type: String,
+  enum: ["pending", "confirmed", "declined"],
+  default: "pending",
+  lowercase: true // 👈 Ye add kar dein, safe rahega
+},
 
   declineReason: String
 

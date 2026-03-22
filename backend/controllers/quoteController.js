@@ -15,7 +15,7 @@ exports.createQuote = async (req, res) => {
     }
 
     // Check request exists
-    const request = await Request.findById(requestId);
+    const request = await Request.findOne({ requestId: requestId });
     if (!request) {
       return res.status(404).json({ msg: "Request not found" });
     }

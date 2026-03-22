@@ -3,7 +3,7 @@ const router = express.Router();
 const enquiryController = require("../controllers/enquiryController");
 
 // Create enquiry + send email
-router.post("/", enquiryController.createEnquiry);
+router.post("/create", enquiryController.createEnquiry);
 
 // Get enquiry by token
 router.get("/:token", enquiryController.getEnquiryByToken);
