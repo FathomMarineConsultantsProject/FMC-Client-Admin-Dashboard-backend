@@ -2,16 +2,16 @@ const express = require("express");
 const router = express.Router();
 const inspectionController = require("../controllers/inspectionController");
 
-// ✅ Route: GET /api/inspections/all
-// Frontend call: axios.get('.../api/inspections/all')
-router.get("/all", inspectionController.getAllInspections);
-
-// ✅ Route: POST /api/inspections/add
-// Frontend call: axios.post('.../api/inspections/add')
-router.post("/add", inspectionController.createInspection);
-
-// Surveyor and Prep routes
+// 1. Assign surveyor
 router.post("/assign", inspectionController.assignSurveyor);
+
+// 2. Send preparation email
 router.post("/send-prep", inspectionController.sendPreparation);
+
+// ✅ ISSE UNCOMMENT KAREIN (Pehle // laga tha, ab hata dein)
+router.post("/add", inspectionController.createInspection); 
+
+// ✅ ISSE BHI UNCOMMENT KAREIN (Agar saari inspections dekhni hain)
+router.get("/", inspectionController.getAllInspections);
 
 module.exports = router;
