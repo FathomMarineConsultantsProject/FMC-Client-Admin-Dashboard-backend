@@ -1,17 +1,23 @@
-const express = require("express");
-const router = express.Router();
-const inspectionController = require("../controllers/inspectionController");
+const mongoose = require("mongoose");
 
-// 1. Assign surveyor
-router.post("/assign", inspectionController.assignSurveyor);
+const requestSchema = new mongoose.Schema({
+  // ObjectId agar user login hai, warna string bhi rakh sakte hain
+  clientId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  clientEmail: String, // Filtering ke liye zaroori hai
+  requestId: { type: String, unique: true },
+  inspectionType: String,
+  shipType: String,
+  port: String,
+  country: String,
+  dateFrom: Date,
+  dateTo: Date,
+  fees: { type: Number, default: 0 },
+  status: {
+    type: String,
+    // Enum lowercase rakhein taaki Postman aur Frontend se mismatch na ho
+    enum: ["pending review", "quote sent", "quote approved", "rejected", "surveyor assigned"],
+    default: "pending review"
+  }
+}, { timestamps: true });
 
-// 2. Send preparation email
-router.post("/send-prep", inspectionController.sendPreparation);
-
-// ✅ ISSE UNCOMMENT KAREIN (Pehle // laga tha, ab hata dein)
-router.post("/add", inspectionController.createInspection); 
-
-// ✅ ISSE BHI UNCOMMENT KAREIN (Agar saari inspections dekhni hain)
-router.get("/", inspectionController.getAllInspections);
-
-module.exports = router;
+module.exports = mongoose.model("InspectionRequest", requestSchema);

@@ -1,31 +1,41 @@
 const User = require("../models/User");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 exports.register = async (req, res) => {
-  const { email, password, role } = req.body;
+  try {
+    const {
+      companyName,
+      email,
+      password,
+      username
+    } = req.body;
 
-  const hashed = await bcrypt.hash(password, 10);
+    // check existing
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ msg: "User already exists" });
+    }
 
-  const user = await User.create({
-    email,
-    password: hashed,
-    role
-  });
+    // hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  res.json(user);
-};
+    const user = await User.create({
+      companyName,
+      email,
+      username,
+      password: hashedPassword,
+      role: "client"
+    });
 
-exports.login = async (req, res) => {
-  const { email, password } = req.body;
+    res.json({
+      success: true,
+      msg: "Registered successfully"
+    });
 
-  const user = await User.findOne({ email });
-  if (!user) return res.status(400).json({ msg: "User not found" });
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return res.status(400).json({ msg: "Wrong password" });
-
-  const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
-
-  res.json({ token, role: user.role });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      msg: err.message
+    });
+  }
 };

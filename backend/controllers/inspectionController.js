@@ -6,29 +6,17 @@ const transporter = require("../config/mailer");
 /* =========================
    CREATE INSPECTION (Add)
 ========================= */
-exports.createInspection = async (req, res) => {
+exports.createRequest = async (req, res) => {
   try {
-    const newInspection = new Inspection(req.body);
-    
-    // Save to Database
-    await newInspection.save();
-    
-    res.status(201).json({ 
-      success: true,
-      msg: "Inspection created successfully", 
-      inspection: newInspection 
+    const request = await Request.create({
+      ...req.body,
+      clientId: req.user ? req.user.id : req.body.clientId // Backup if no token
     });
-  } catch (error) {
-    console.error("Creation Error:", error);
-
-    // If it's a validation error (missing required fields), show the specific message
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ 
-        success: false, 
-        msg: "Validation Failed", 
-        error: error.message 
-      });
-    }
+    res.json(request);
+  } catch (err) {
+    res.status(400).json({ msg: err.message });
+  }
+};
 
     // Handle Duplicate Key (e.g., same requestId sent twice)
     if (error.code === 11000) {
