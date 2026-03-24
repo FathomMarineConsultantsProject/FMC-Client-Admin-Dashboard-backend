@@ -1,34 +1,21 @@
-const mongoose = require("mongoose");
+const express = require("express");
+const router = express.Router();
+const Inspection = require("../models/InspectionRequest");
 
-const requestSchema = new mongoose.Schema({
-  clientId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  clientEmail: { type: String, required: true },
+// ✅ GET ALL INSPECTIONS
+router.get("/", async (req, res) => {
+  try {
+    console.log("📥 Fetching inspections...");
 
-  requestId: { type: String, unique: true, required: true },
+    const data = await Inspection.find().sort({ createdAt: -1 });
 
-  inspectionType: String,
-  shipType: String,
-  port: String,
-  country: String,
+    console.log("✅ Found:", data.length);
 
-  dateFrom: String, // ✅ safer
-  dateTo: String,   // ✅ safer
-
-  fees: { type: Number, default: 0 },
-
-  status: {
-    type: String,
-    enum: [
-      "pending review",
-      "quote sent",
-      "quote approved",
-      "rejected",
-      "surveyor assigned"
-    ],
-    default: "pending review"
+    res.status(200).json(data); // ❗ VERY IMPORTANT
+  } catch (err) {
+    console.error("❌ ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
-}, { timestamps: true });
+});
 
-module.exports =
-  mongoose.models.InspectionRequest ||
-  mongoose.model("InspectionRequest", requestSchema);
+module.exports = router;
