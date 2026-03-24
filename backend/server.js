@@ -24,9 +24,10 @@ app.use(helmet());
 app.use(morgan("dev"));
 
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(",")
-    : "*", // ✅ fallback fix
+  origin: [
+    "http://localhost:8080", // for local dev
+    process.env.FRONTEND_URL
+  ],
   credentials: true
 }));
 
