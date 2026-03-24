@@ -10,25 +10,30 @@ exports.createRequest = async (req, res) => {
   try {
     const request = await Request.create({
       ...req.body,
-      clientId: req.user ? req.user.id : req.body.clientId
+      clientId: req.user ? req.user.id : req.body.clientId // Backup if no token
     });
-
     res.json(request);
-
-  } catch (error) {
-
-    // ✅ Handle duplicate key properly
-    if (error.code === 11000) {
-      return res.status(400).json({
-        msg: "Duplicate request detected"
-      });
-    }
-
-    res.status(400).json({ msg: error.message });
+  } catch (err) {
+    res.status(400).json({ msg: err.message });
   }
 };
 
-    
+    // Handle Duplicate Key (e.g., same requestId sent twice)
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        msg: "An inspection with this requestId already exists." 
+      });
+    }
+
+    res.status(500).json({ 
+      success: false, 
+      msg: "Internal Server Error", 
+      details: error.message 
+    });
+  }
+};
+
 /* =========================
    ASSIGN SURVEYOR
 ========================= */

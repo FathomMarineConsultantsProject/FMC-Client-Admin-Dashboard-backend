@@ -1,42 +1,31 @@
 const express = require("express");
 const router = express.Router();
+const Inspection = require("../models/Inspection");
 
-// ✅ USE CORRECT MODEL
-const Request = require("../models/InspectionRequest");
-
-/* =========================
-   CREATE REQUEST
-========================= */
+// CLIENT: Create New Request
 router.post("/add", async (req, res) => {
   try {
     const requestId = "REQ-" + Math.floor(100000 + Math.random() * 900000);
-
-    const newRequest = new Request({
-      ...req.body,
+    const newRequest = new Inspection({ 
+      ...req.body, 
       requestId,
-      status: "pending review" // ✅ match enum
+      status: "Pending Review" // Default starting status
     });
-
     await newRequest.save();
-
     res.status(201).json(newRequest);
-
   } catch (err) {
-    console.error("ADD ERROR:", err); // ✅ debug
     res.status(500).json({ error: err.message });
   }
 });
 
-/* =========================
-   GET ALL REQUESTS
-========================= */
+
+// GET all requests for the Admin table
 router.get("/all", async (req, res) => {
   try {
-    const requests = await Request.find().sort({ createdAt: -1 });
-    res.json(requests);
-
+    // Sort by most recent first
+    const inspections = await Inspection.find().sort({ createdAt: -1 });
+    res.json(inspections);
   } catch (err) {
-    console.error("FETCH ERROR:", err);
     res.status(500).json({ error: "Could not retrieve requests" });
   }
 });
